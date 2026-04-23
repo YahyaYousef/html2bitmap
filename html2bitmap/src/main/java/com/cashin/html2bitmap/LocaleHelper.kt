@@ -16,20 +16,9 @@ internal object LocaleHelper {
         }
     }
 
-    fun createLockedContext(context: Context, locale: Locale, density: Float): Context {
+    fun createLockedContext(context: Context, locale: Locale): Context {
         val config = Configuration(context.resources.configuration)
         config.setLocale(locale)
-        config.densityDpi = (density * 160).toInt()
         return context.createConfigurationContext(config)
-    }
-
-    fun restoreLocale(context: Context, locale: Locale) {
-        val config = Configuration(context.applicationContext.resources.configuration)
-        config.setLocale(locale)
-        @Suppress("DEPRECATION")
-        context.applicationContext.resources.updateConfiguration(
-            config,
-            context.applicationContext.resources.displayMetrics
-        )
     }
 }

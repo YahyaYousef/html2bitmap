@@ -8,13 +8,17 @@ import android.graphics.Color
  * @property timeoutMs Maximum time to wait for rendering to complete before throwing a TimeoutCancellationException.
  * @property backgroundColor Background color of the WebView. Defaults to Color.WHITE.
  * @property javascriptEnabled Whether to enable JavaScript execution in the WebView.
- * @property textZoom Text zoom percentage, defaults to 100%.
- * @property density Optional density override. If null, uses the device's screen density. Set to 1.0f for printing.
+ * @property textZoom Optional text zoom percentage. If null, WebView default is used.
+ * @property measureDelayMs Delay after page progress indicates completion before measuring content.
+ * @property screenshotDelayMs Delay after measure/layout settles before drawing to bitmap.
+ * @property strictMode If true, throws when blocking API is used from the main thread.
  */
 data class BitmapConfig(
     val timeoutMs: Long = 30_000L,
     val backgroundColor: Int = Color.WHITE,
     val javascriptEnabled: Boolean = false,
-    val textZoom: Int = 100,
-    val density: Float? = null
+    val textZoom: Int? = null,
+    val measureDelayMs: Long = 300L,
+    val screenshotDelayMs: Long = 300L,
+    val strictMode: Boolean = false
 )
