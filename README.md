@@ -92,12 +92,6 @@ val config = BitmapConfig(
 val bitmap = HtmlToBitmap.from(context, html, 800, config)
 ```
 
-### Grayscale for Thermal Printers
-
-```kotlin
-val printBitmap = bitmap.toGrayscale()
-```
-
 ## License
 
 ```
