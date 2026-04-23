@@ -16,9 +16,10 @@ internal object LocaleHelper {
         }
     }
 
-    fun createLockedContext(context: Context, locale: Locale): Context {
+    fun createLockedContext(context: Context, locale: Locale, density: Float): Context {
         val config = Configuration(context.resources.configuration)
         config.setLocale(locale)
+        config.densityDpi = (density * 160).toInt()
         return context.createConfigurationContext(config)
     }
 

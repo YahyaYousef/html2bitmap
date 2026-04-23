@@ -29,7 +29,8 @@ internal object HtmlToBitmapRenderer {
 
         // STEP 1: Capture locale before ANY WebView interaction
         val locale = LocaleHelper.captureLocale(context)
-        val safeContext = LocaleHelper.createLockedContext(context, locale)
+        val density = config.density ?: context.resources.displayMetrics.density
+        val safeContext = LocaleHelper.createLockedContext(context, locale, density)
         val mainHandler = Handler(Looper.getMainLooper())
 
         // Must be called BEFORE any WebView instance is created (static method)
@@ -54,7 +55,8 @@ internal object HtmlToBitmapRenderer {
             val widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(widthPx, View.MeasureSpec.EXACTLY)
             val heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
             webView.measure(widthMeasureSpec, heightMeasureSpec)
-            webView.layout(0, 0, widthPx, webView.measuredHeight.coerceAtLeast(1))
+            val initialHeight = webView.measuredHeight.coerceAtLeast(1)
+            webView.layout(0, 0, widthPx, initialHeight)
 
             /**
              * Polls contentHeight until it becomes > 0, then captures the bitmap.
@@ -62,19 +64,23 @@ internal object HtmlToBitmapRenderer {
             fun pollAndCapture(attempt: Int) {
                 if (!continuation.isActive) return
 
-                val contentHeight = webView.contentHeight
-                if (contentHeight > 0) {
+                val contentHeightCss = webView.contentHeight
+                if (contentHeightCss > 0) {
                     try {
+                        // webView.contentHeight is in CSS pixels (DP). 
+                        // Convert to physical pixels based on the context density.
+                        val contentHeightPx = (contentHeightCss * density).toInt().coerceAtLeast(1)
+
                         // Re-measure and layout with the real content height
                         webView.measure(
                             View.MeasureSpec.makeMeasureSpec(widthPx, View.MeasureSpec.EXACTLY),
-                            View.MeasureSpec.makeMeasureSpec(contentHeight, View.MeasureSpec.EXACTLY)
+                            View.MeasureSpec.makeMeasureSpec(contentHeightPx, View.MeasureSpec.EXACTLY)
                         )
-                        webView.layout(0, 0, widthPx, contentHeight)
+                        webView.layout(0, 0, widthPx, contentHeightPx)
 
                         val bitmap = createBitmap(
                             widthPx,
-                            contentHeight,
+                            contentHeightPx,
                             Bitmap.Config.ARGB_8888
                         )
                         val canvas = Canvas(bitmap)
