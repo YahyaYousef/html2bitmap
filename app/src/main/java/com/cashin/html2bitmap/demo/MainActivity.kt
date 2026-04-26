@@ -1,7 +1,9 @@
 package com.cashin.html2bitmap.demo
 
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.os.Bundle
+import android.webkit.WebView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -14,10 +16,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.cashin.html2bitmap.BitmapConfig
-import com.cashin.html2bitmap.HtmlToBitmap
+import com.cashin.html2bitmap.Html2Bitmap
+import com.cashin.html2bitmap.Html2BitmapConfigurator
+import com.cashin.html2bitmap.content.WebViewContent
 import com.cashin.html2bitmap.demo.ui.theme.Html2bitmapTheme
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,6 +71,13 @@ fun DemoScreen(modifier: Modifier = Modifier) {
         </html>
     """.trimIndent()
 
+    val html2BitmapConfigurator: Html2BitmapConfigurator = object : Html2BitmapConfigurator() {
+        override fun configureWebView(webview: WebView) {
+            webview.setBackgroundColor(Color.WHITE)
+            webview.settings.textZoom = 150
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -81,13 +93,24 @@ fun DemoScreen(modifier: Modifier = Modifier) {
                 
                 coroutineScope.launch {
                     try {
-                        val resultBitmap = HtmlToBitmap.from(
-                            context = context,
-                            html = sampleHtml,
-                            widthPx = 800,
-                            config = BitmapConfig()
-                        )
+                        val resultBitmap = withContext(Dispatchers.Default) {
+                            Html2Bitmap.Builder()
+                                .setContext(context)
+                                .setContent(WebViewContent.html(sampleHtml))
+                                .setBitmapWidth(384)
+                                .setMeasureDelay(100)
+                                .setScreenshotDelay(100)
+                                .setStrictMode(true)
+                                .setTimeout(50)
+                                .setTextZoom(150)
+                                .setConfigurator(html2BitmapConfigurator)
+                                .build()
+                                .getBitmap()
+                        }
                         bitmap = resultBitmap
+                        if (resultBitmap == null) {
+                            errorMessage = "Rendering failed. Check logs for details."
+                        }
                     } catch (e: Exception) {
                         errorMessage = "Error: ${e.message}"
                     } finally {
