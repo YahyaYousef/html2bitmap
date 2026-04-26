@@ -72,14 +72,14 @@ Add the dependency to your app-level `build.gradle` or `build.gradle.kts`:
 #### Kotlin DSL (`build.gradle.kts`)
 ```kotlin
 dependencies {
-    implementation("com.github.YahyaYousef:html2bitmap:1.0.0")
+    implementation("com.github.YahyaYousef:html2bitmap:{latest_version}")
 }
 ```
 
 #### Groovy (`build.gradle`)
 ```groovy
 dependencies {
-    implementation 'com.github.YahyaYousef:html2bitmap:1.0.0'
+    implementation 'com.github.YahyaYousef:html2bitmap:{latest_version}'
 }
 ```
 
